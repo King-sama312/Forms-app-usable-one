@@ -10,7 +10,7 @@ const base: CookieOptions = {
 };
 
 const accessOptions: CookieOptions = {...base, path:"/"}
-const refreshOptions: CookieOptions = {...base, path:"/api/auth"}
+const refreshOptions: CookieOptions = {...base, path:"/auth"}
 
 type Session  = {accessToken: string, refreshToken:string, refreshExpiresAt: Date}
 

@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { prisma } from "../../prisma.js";
-import { Prisma, PrismaClient } from "../../../generated/prisma/client.js";
+import { Prisma } from "../../../generated/prisma/client.js";
 import { ApiError } from "../../common/api.error.js";
 import type { LoginBody, RegisterBody } from "./auth.model.js";
 import {
@@ -10,7 +10,7 @@ import {
   REFRESH_TTL_MS,
 } from "../../common/auth.config.js";
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
+const ACCESS_SECRET = process.env.ACCESS_SECRET!;
 const BCRYPT_ROUNDS = 12;
 const DUMMY_HASH = bcrypt.hashSync("dummy-password", BCRYPT_ROUNDS);
 
@@ -142,7 +142,7 @@ export async function logoutAll(userId: number) {
 }
 
 export async function getMe(userId: number) {
-  const user = prisma.user.findUnique({
+  const user = await  prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, email: true },
   });
