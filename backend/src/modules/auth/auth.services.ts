@@ -5,12 +5,16 @@ import { prisma } from "../../prisma.js";
 import { Prisma, PrismaClient } from "../../../generated/prisma/client.js";
 import { ApiError } from "../../common/api.error.js";
 import type { LoginBody, RegisterBody } from "./auth.model.js";
+import {
+  ACCESS_TTL_SECONDS,
+  REFRESH_TTL_MS,
+} from "../../common/auth.config.js";
 
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
-const ACCESS_TTL = "15m";
-const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const BCRYPT_ROUNDS = 12;
 const DUMMY_HASH = bcrypt.hashSync("dummy-password", BCRYPT_ROUNDS);
+
+type Db = Prisma.TransactionClient | typeof prisma;
 
 const hashToken = (token: string) => {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -19,15 +23,15 @@ const hashToken = (token: string) => {
 const signAccessToken = (userId: number) => {
   return jwt.sign({}, ACCESS_SECRET, {
     subject: String(userId),
-    expiresIn: ACCESS_TTL,
+    expiresIn: ACCESS_TTL_SECONDS,
   });
 };
 
-async function createSession(userId: number, tx: Prisma.TransactionClient) {
+async function createSession(userId: number, db: Db = prisma) {
   const refreshToken = crypto.randomBytes(48).toString("base64url");
   const refreshExpiresAt = new Date(Date.now() + REFRESH_TTL_MS);
 
-  await tx.refreshToken.create({
+  await db.refreshToken.create({
     data: {
       userId,
       tokenHash: hashToken(refreshToken),
@@ -57,7 +61,7 @@ export async function register({ email, password }: RegisterBody) {
       return { user, ...session };
     });
 
-    return { result };
+    return result;
   } catch (e) {
     if (
       e instanceof Prisma.PrismaClientKnownRequestError &&
@@ -80,9 +84,7 @@ export async function login({ email, password }: LoginBody) {
 
   if (!user || !valid) throw ApiError.unauthorized("Invalid credentials");
 
-  const session = await prisma.$transaction(async (tx) => {
-    return await createSession(user.id, tx);
-  });
+  const session = await createSession(user.id);
 
   return {
     user: { id: user.id, email: user.email },
@@ -137,4 +139,14 @@ export async function logoutAll(userId: number) {
     where: { userId: userId, revokedAt: null },
     data: { revokedAt: new Date() },
   });
+}
+
+export async function getMe(userId: number) {
+  const user = prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true },
+  });
+
+  if (!user) throw ApiError.unauthorized("User no longer exists");
+  return user;
 }
