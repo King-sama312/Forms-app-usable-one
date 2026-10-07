@@ -51,7 +51,7 @@ model RefreshToken {
 }
 
 model Form {
-  id          Int          @id @default(autoincrement())
+  id          String          @id @default(uuid(7))
   userId      Int
   title       String
   description String?
@@ -68,8 +68,8 @@ model Form {
 }
 
 model Field {
-  id        Int       @id @default(autoincrement())
-  formId    Int
+  id        String       @id @default(uuid(7))
+  formId    String
   label     String
   type      FieldType
   required  Boolean   @default(false)
@@ -84,8 +84,8 @@ model Field {
 }
 
 model Submission {
-  id        Int      @id @default(autoincrement())
-  formId    Int
+  id        String      @id @default(uuid(7))
+  formId    String
   userId    Int?
   form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
