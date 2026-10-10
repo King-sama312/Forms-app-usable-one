@@ -8,7 +8,7 @@ import cors from "cors";
 import formRoutes from "./modules/form/form.routes.js"
 import authRoutes from "./modules/auth/auth.routes.js"
 import { ApiError } from "./common/api.error.js";
-import { errorMiddleware } from "./middleware/error.middleware.js";
+import { errorMiddleware } from "./common/middleware/error.middleware.js";
 import cookieParser from "cookie-parser";
 
 const app: Application = express();
@@ -23,7 +23,8 @@ app.use(cookieParser())
 app.get("/", (req: Request, res: Response) => {
   res.send("Yooo! the server is live");
 });
-app.use("/api", formRoutes, authRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/forms", formRoutes);
 
 app.all("{*path}", (req: Request, res: Response) => {
   throw ApiError.notFound(`Route ${req.originalUrl} not found`);

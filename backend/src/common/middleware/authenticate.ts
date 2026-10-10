@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { ApiError } from "../common/api.error.js";
+import { ApiError } from "../api.error.js";
 import { getAccessCookie } from "../utils/cookies.js";
 
 export function authenticate(req: Request, _res: Response, next: NextFunction) {

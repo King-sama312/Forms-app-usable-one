@@ -1,5 +1,5 @@
 import type { CookieOptions, Response, Request } from "express";
-import { ACCESS_TTL_SECONDS,REFRESH_TTL_MS } from "../common/auth.config.js";
+import { ACCESS_TTL_SECONDS,REFRESH_TTL_MS } from "../auth.config.js";
 const ACCESS_COOKIE = "accessToken";
 const REFRESH_COOKIE = "refreshToken";
 

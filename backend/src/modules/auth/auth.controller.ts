@@ -5,7 +5,7 @@ import {
   setAuthCookies,
   clearAuthCookies,
   getRefreshCookie,
-} from "../../utils/cookies.js";
+} from "../../common/utils/cookies.js";
 import { loginSchema, registerSchema } from "./auth.model.js";
 
 export async function register(req: Request, res: Response) {

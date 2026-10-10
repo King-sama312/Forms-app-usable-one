@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 
-import { ApiError } from "../common/api.error.js";
+import { ApiError } from "../api.error.js";
 
 export function errorMiddleware(
   error: Error,
