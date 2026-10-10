@@ -16,7 +16,7 @@ const options = z
 const textField = z.object({
   ...base,
   type: z.literal("TEXT"),
-  config: z.object({ maxLength: z.number().optional() }),
+  config: z.object({ maxLength: z.number().int().positive().optional() }).optional(),
 });
 
 const numberField = z.object({
@@ -69,3 +69,41 @@ export const createFormSchema = z.object({
       "Fields label must be unique",
     ),
 });
+
+export const updateFormSchema =z.object({
+  title: title.optional(),
+  description: description.nullable().optional(),
+  expiresAt: futureDate.nullable().optional()
+}).refine((b) => Object.keys(b).length > 0, "Nothing to update");
+
+export const addFieldSchema = fieldSchema;
+
+export const updateFieldSchema = fieldSchema;
+
+export const idParamSchema = z.object({id: z.uuid()})
+
+// for routes like /forms/:formId/fields/:fieldId
+export const fieldParamsSchema = z.object({
+  formId: z.uuid(),
+  fieldId: z.uuid(),
+});
+
+// for the reorder route
+export const reorderFieldsSchema = z.object({
+  fieldIds: z.array(z.uuid()).min(1).max(100),
+});
+
+// for the list route (no paging yet)
+export const listFormsQuerySchema = z.object({
+  status: z.enum(["DRAFT", "PUBLISHED", "EXPIRED"]).optional(),
+});
+
+
+export type UpdateFieldBody = z.infer<typeof updateFieldSchema>;
+export type CreateFormBody = z.infer<typeof createFormSchema>;
+export type UpdateFormBody = z.infer<typeof updateFormSchema>;
+export type AddFieldBody = z.infer<typeof addFieldSchema>;
+export type ListFormsQuery = z.infer<typeof listFormsQuerySchema>;
+export type FieldParams = z.infer<typeof fieldParamsSchema>;
+export type ReorderFieldsBody = z.infer<typeof reorderFieldsSchema>;
+
