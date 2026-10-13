@@ -51,7 +51,7 @@ export async function logout(req: Request, res: Response) {
   if (token) await authServices.logout(token);
 
   clearAuthCookies(res);
-  res.status(200).json({ok: true});
+  res.status(200).json({ ok: true });
 }
 
 export async function logoutAll(req: Request, res: Response) {

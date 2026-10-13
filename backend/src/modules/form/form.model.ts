@@ -16,7 +16,9 @@ const options = z
 const textField = z.object({
   ...base,
   type: z.literal("TEXT"),
-  config: z.object({ maxLength: z.number().int().positive().optional() }).optional(),
+  config: z
+    .object({ maxLength: z.number().int().positive().optional() })
+    .optional(),
 });
 
 const numberField = z.object({
@@ -30,7 +32,8 @@ const numberField = z.object({
     .refine(
       (c) => c.min === undefined || c.max === undefined || c.min <= c.max,
       "Min must be smaller than max ",
-    ).optional(),
+    )
+    .optional(),
 });
 
 const dropdownField = z.object({
@@ -70,17 +73,19 @@ export const createFormSchema = z.object({
     ),
 });
 
-export const updateFormSchema =z.object({
-  title: title.optional(),
-  description: description.nullable().optional(),
-  expiresAt: futureDate.nullable().optional()
-}).refine((b) => Object.keys(b).length > 0, "Nothing to update");
+export const updateFormSchema = z
+  .object({
+    title: title.optional(),
+    description: description.nullable().optional(),
+    expiresAt: futureDate.nullable().optional(),
+  })
+  .refine((b) => Object.keys(b).length > 0, "Nothing to update");
 
 export const addFieldSchema = fieldSchema;
 
 export const updateFieldSchema = fieldSchema;
 
-export const idParamSchema = z.object({id: z.uuid()})
+export const idParamSchema = z.object({ id: z.uuid() });
 
 // for routes like /forms/:formId/fields/:fieldId
 export const fieldParamsSchema = z.object({
@@ -98,7 +103,6 @@ export const listFormsQuerySchema = z.object({
   status: z.enum(["DRAFT", "PUBLISHED", "EXPIRED"]).optional(),
 });
 
-
 export type UpdateFieldBody = z.infer<typeof updateFieldSchema>;
 export type CreateFormBody = z.infer<typeof createFormSchema>;
 export type UpdateFormBody = z.infer<typeof updateFormSchema>;
@@ -106,4 +110,3 @@ export type AddFieldBody = z.infer<typeof addFieldSchema>;
 export type ListFormsQuery = z.infer<typeof listFormsQuerySchema>;
 export type FieldParams = z.infer<typeof fieldParamsSchema>;
 export type ReorderFieldsBody = z.infer<typeof reorderFieldsSchema>;
-

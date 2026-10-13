@@ -142,7 +142,7 @@ export async function logoutAll(userId: number) {
 }
 
 export async function getMe(userId: number) {
-  const user = await  prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, email: true },
   });

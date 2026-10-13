@@ -1,6 +1,4 @@
 import type { Request, Response } from "express";
-import { z } from "zod";
-import { ApiError } from "../../common/api.error.js";
 import {
   addFieldSchema,
   createFormSchema,
@@ -11,13 +9,7 @@ import {
   updateFormSchema,
 } from "./form.model.js";
 import * as formServices from "./form.services.js";
-
-// checks the data with Zod, and throws a 400 error if it is not valid
-function parse<T extends z.ZodType>(schema: T, data: unknown): z.infer<T> {
-  const result = schema.safeParse(data);
-  if (!result.success) throw ApiError.badRequest(z.prettifyError(result.error));
-  return result.data;
-}
+import { parse } from "../../common/parse.js";
 
 /* ---------- forms ---------- */
 
@@ -76,7 +68,12 @@ export async function updateField(req: Request, res: Response) {
   const { formId, fieldId } = parse(fieldParamsSchema, req.params);
   const body = parse(updateFieldSchema, req.body);
   // note: the service takes fieldId first
-  const field = await formServices.updateField(fieldId, formId, req.user!.id, body);
+  const field = await formServices.updateField(
+    fieldId,
+    formId,
+    req.user!.id,
+    body,
+  );
   res.json({ field });
 }
 

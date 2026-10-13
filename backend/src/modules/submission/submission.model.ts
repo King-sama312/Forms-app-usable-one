@@ -1,40 +1,42 @@
 import { z } from "zod";
+import type { Field } from "../../../generated/prisma/client.js";
 
-interface FieldDefinition {
-  id: number;
-  label: string;
-  type: "text" | "number" | "boolean";
-  required: boolean;
-}
-
-// fetched fields
-const apiFields: FieldDefinition[] = [
-  { id: 1, label: "username", type: "text", required: true },
-  { id: 2, label: "age", type: "number", required: false },
-  { id: 3, label: "newsletter", type: "boolean", required: true },
-];
-
-const schemaShape: Record<string, z.ZodType> = {};
-
-apiFields.forEach((field) => {
-  let zodType: z.ZodType;
+function answerRule(field: Field) {
+  // config is Json in the database, so we tell TypeScript its shape
+  const config = (field.config ?? {}) as Record<string, any>;
 
   switch (field.type) {
-    case "number":
-      zodType = z.number();
-      break;
-    case "boolean":
-      zodType = z.boolean();
-      break;
-    default:
-      zodType = z.string();
+    case "TEXT": {
+      let rule = z.string().trim();
+      if (field.required) rule = rule.min(1, "This answer is required");
+      if (config.maxLength) rule = rule.max(config.maxLength);
+      return rule;
+    }
+    case "NUMBER": {
+      let rule = z.number();
+      if (config.min !== undefined) rule = rule.min(config.min);
+      if (config.max !== undefined) rule = rule.max(config.max);
+      return rule;
+    }
+    case "DROPDOWN":
+      return z.enum(config.options); // must match one option exactly
+    case "CHECKBOX": {
+      let rule = z
+        .array(z.enum(config.options))
+        .refine((a) => new Set(a).size === a.length, "Repeated choices");
+      if (field.required) rule = rule.min(1, "Choose at least one option");
+      return rule;
+    }
+  }
+}
+
+export function buildAnswerSchema(fields: Field[]) {
+  const shape: Record<string, z.ZodType> = {};
+
+  for (const field of fields) {
+    const rule = answerRule(field);
+    shape[field.id] = field.required ? rule : rule.optional();
   }
 
-  if (!field.required) {
-    zodType = zodType.optional();
-  }
-
-  schemaShape[field.id] = zodType;
-});
-
-const dynamicSchema = z.object(schemaShape);
+  return z.strictObject(shape);
+}
