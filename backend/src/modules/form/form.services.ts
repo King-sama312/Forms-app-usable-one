@@ -70,12 +70,12 @@ export async function updateForm(
     throw ApiError.conflict("Only forms in draft can be changed");
 
   const { title, description, expiresAt } = data;
-  const updateForm = await prisma.form.update({
+  const updatedForm = await prisma.form.update({
     where: { id: formId },
     data: { title, description, expiresAt },
   });
 
-  return updateForm;
+  return updatedForm;
 }
 
 export async function addField(
