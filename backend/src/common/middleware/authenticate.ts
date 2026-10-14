@@ -18,3 +18,13 @@ export function authenticate(req: Request, _res: Response, next: NextFunction) {
     throw ApiError.unauthorized("Invalid or expired token");
   }
 }
+
+export function optionalAuthenticate(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  if (!getAccessCookie(req)) return next(); // anonymous
+  authenticate(req, res, next); // there is a cookie, so it must be valid
+}
+
