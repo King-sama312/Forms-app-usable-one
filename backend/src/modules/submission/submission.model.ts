@@ -40,3 +40,15 @@ export function buildAnswerSchema(fields: Field[]) {
 
   return z.strictObject(shape);
 }
+
+export const listSubmissionsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const submissionParamsSchema = z.object({
+  formId: z.uuid(),
+  submissionId: z.uuid(),
+});
+
+export type ListSubmissionsQuery = z.infer<typeof listSubmissionsQuerySchema>;
