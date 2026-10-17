@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { ApiError } from "../api.error.js";
 import { getAccessCookie } from "../utils/cookies.js";
+import { env } from "../env.js";
 
 export function authenticate(req: Request, _res: Response, next: NextFunction) {
   const token = getAccessCookie(req);
@@ -10,7 +11,7 @@ export function authenticate(req: Request, _res: Response, next: NextFunction) {
   try {
     const payload = jwt.verify(
       token,
-      process.env.ACCESS_SECRET!,
+      env.ACCESS_SECRET,
     ) as jwt.JwtPayload;
     req.user = { id: Number(payload.sub) };
     next();

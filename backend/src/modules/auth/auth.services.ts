@@ -9,8 +9,9 @@ import {
   ACCESS_TTL_SECONDS,
   REFRESH_TTL_MS,
 } from "../../common/auth.config.js";
+import { env } from "../../common/env.js";
 
-const ACCESS_SECRET = process.env.ACCESS_SECRET!;
+const ACCESS_SECRET = env.ACCESS_SECRET;
 const BCRYPT_ROUNDS = 12;
 const DUMMY_HASH = bcrypt.hashSync("dummy-password", BCRYPT_ROUNDS);
 

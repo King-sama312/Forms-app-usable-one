@@ -1,11 +1,12 @@
 import type { CookieOptions, Response, Request } from "express";
 import { ACCESS_TTL_SECONDS, REFRESH_TTL_MS } from "../auth.config.js";
+import { env } from "../env.js";
 const ACCESS_COOKIE = "accessToken";
 const REFRESH_COOKIE = "refreshToken";
 
 const base: CookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
+  secure: env.NODE_ENV === "production",
   sameSite: "strict",
 };
 
