@@ -26,13 +26,13 @@ enum FormStatus {
 }
 
 model User {
-  id           Int          @id @default(autoincrement())
-  email        String       @unique
-  passwordHash String
-  forms        Form[]
-  submissions  Submission[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  passwordHash  String
+  forms         Form[]
+  submissions   Submission[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[]
 }
 
@@ -51,24 +51,26 @@ model RefreshToken {
 }
 
 model Form {
-  id          String          @id @default(uuid(7))
-  userId      Int
-  title       String
-  description String?
-  status      FormStatus   @default(DRAFT)
-  fields      Field[]
-  submissions Submission[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  expiresAt   DateTime?
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String       @id @default(uuid(7))
+  userId         Int
+  title          String
+  description    String?
+  status         FormStatus   @default(DRAFT)
+  fields         Field[]
+  submissions    Submission[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  expiresAt      DateTime?
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requireLogin   Boolean      @default(false)
+  singleResponse Boolean      @default(false)
 
   @@index([status])
   @@index([userId])
 }
 
 model Field {
-  id        String       @id @default(uuid(7))
+  id        String    @id @default(uuid(7))
   formId    String
   label     String
   type      FieldType
@@ -84,14 +86,16 @@ model Field {
 }
 
 model Submission {
-  id        String      @id @default(uuid(7))
+  id        String   @id @default(uuid(7))
   formId    String
   userId    Int?
+  singleUserId Int? 
   form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   data      Json
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  @@unique([formId, singleUserId])
   @@index([userId])
   @@index([formId, createdAt])
 }

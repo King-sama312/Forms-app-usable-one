@@ -28,6 +28,8 @@ CREATE TABLE "Form" (
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     "expiresAt" DATETIME,
+    "requireLogin" BOOLEAN NOT NULL DEFAULT false,
+    "singleResponse" BOOLEAN NOT NULL DEFAULT false,
     CONSTRAINT "Form_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -50,6 +52,7 @@ CREATE TABLE "Submission" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "formId" TEXT NOT NULL,
     "userId" INTEGER,
+    "singleUserId" INTEGER,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "data" JSONB NOT NULL,
     CONSTRAINT "Submission_formId_fkey" FOREIGN KEY ("formId") REFERENCES "Form" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
@@ -85,3 +88,6 @@ CREATE INDEX "Submission_userId_idx" ON "Submission"("userId");
 
 -- CreateIndex
 CREATE INDEX "Submission_formId_createdAt_idx" ON "Submission"("formId", "createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Submission_formId_singleUserId_key" ON "Submission"("formId", "singleUserId");
