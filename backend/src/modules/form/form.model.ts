@@ -59,28 +59,38 @@ const futureDate = z.coerce
   .date()
   .refine((d) => d > new Date(), "Must be in the future");
 
-export const createFormSchema = z.object({
-  title,
-  description: description.optional(),
-  expiresAt: futureDate.optional(),
-  fields: z
-    .array(fieldSchema)
-    .max(100, "Too many fields")
-    .default([])
-    .refine(
-      (fs) => new Set(fs.map((f) => f.label.toLowerCase())).size === fs.length,
-      "Fields label must be unique",
-    ),
-});
+export const createFormSchema = z
+  .object({
+    title,
+    description: description.optional(),
+    expiresAt: futureDate.optional(),
+    requireLogin: z.boolean().default(false),
+    singleResponse: z.boolean().default(false),
+    fields: z
+      .array(fieldSchema)
+      .max(100, "Too many fields")
+      .default([])
+      .refine(
+        (fs) =>
+          new Set(fs.map((f) => f.label.toLowerCase())).size === fs.length,
+        "Fields label must be unique",
+      ),
+  })
+  .refine((f) => !f.singleResponse || f.requireLogin, {
+    message: "singleResponse needs requireLogin",
+    path: ["singleResponse"],
+  });
 
 export const updateFormSchema = z
   .object({
     title: title.optional(),
     description: description.nullable().optional(),
     expiresAt: futureDate.nullable().optional(),
+    requireLogin: z.boolean().optional(),
+    singleResponse: z.boolean().optional(),
   })
   .refine((b) => Object.keys(b).length > 0, "Nothing to update");
-
+  
 export const addFieldSchema = fieldSchema;
 
 export const updateFieldSchema = fieldSchema;

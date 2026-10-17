@@ -9,7 +9,7 @@ import type {
 } from "./form.model.js";
 
 export async function createForm(userId: number, data: CreateFormBody) {
-  const { title, description, fields, expiresAt } = data;
+  const { title, description, fields, expiresAt,requireLogin,singleResponse } = data;
 
   const form = await prisma.form.create({
     data: {
@@ -17,6 +17,8 @@ export async function createForm(userId: number, data: CreateFormBody) {
       title,
       description,
       expiresAt,
+      requireLogin,
+      singleResponse,
       fields: {
         create: fields.map((field, index) => ({ ...field, order: index })),
       },
@@ -69,10 +71,18 @@ export async function updateForm(
   if (form.status !== "DRAFT")
     throw ApiError.conflict("Only forms in draft can be changed");
 
-  const { title, description, expiresAt } = data;
+  const { title, description, expiresAt, requireLogin, singleResponse } = data;
+
+  const finalRequireLogin = requireLogin ?? form.requireLogin;
+  const finalSingleResponse = singleResponse ?? form.singleResponse;
+
+  if (finalSingleResponse && !finalRequireLogin) {
+    throw ApiError.badRequest("singleResponse needs requireLogin");
+  }
+
   const updatedForm = await prisma.form.update({
     where: { id: formId },
-    data: { title, description, expiresAt },
+    data: { title, description, expiresAt, requireLogin, singleResponse },
   });
 
   return updatedForm;

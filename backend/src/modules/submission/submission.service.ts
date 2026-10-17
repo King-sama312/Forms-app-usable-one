@@ -5,7 +5,7 @@ import {
   buildAnswerSchema,
   type ListSubmissionsQuery,
 } from "./submission.model.js";
-import { Prisma } from "../../../generated/prisma/browser.js";
+import { Prisma } from "../../../generated/prisma/client.js";
 
 // Submit Form
 export async function submitForm(
@@ -29,15 +29,40 @@ export async function submitForm(
     throw ApiError.conflict("This form is closed");
   }
 
+  if (form.requireLogin && userId === null) {
+    throw ApiError.unauthorized("You must log in to answer this form");
+  }
+
+  if (form.singleResponse && userId !== null) {
+    const existing = await prisma.submission.findFirst({
+      where: { formId, userId },
+      select: { id: true },
+    });
+    if (existing) throw ApiError.conflict("You already answered this form");
+  }
+
   const result = buildAnswerSchema(form.fields).safeParse(answers);
   if (!result.success) {
     throw ApiError.badRequest(z.prettifyError(result.error));
   }
 
-  return prisma.submission.create({
-    data: { formId, userId, data: result.data as Prisma.InputJsonObject },
-    select: { id: true, createdAt: true },
-  });
+    try {
+    return await prisma.submission.create({
+      data: {
+        formId,
+        userId,
+        singleUserId: form.singleResponse ? userId : null,
+        data: result.data as Prisma.InputJsonObject,
+      },
+      select: { id: true, createdAt: true },
+    });
+  } catch (e) {
+    // the double-click case: the database refuses the second row
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      throw ApiError.conflict("You already answered this form");
+    }
+    throw e;
+  }
 }
 
 // Get Submissions
