@@ -4,7 +4,7 @@ import express, {
   type Request,
   type Response,
 } from "express";
-import cors from "cors";
+// import cors from "cors";
 import formRoutes from "./modules/form/form.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import submissionRoutes from "./modules/submission/submission.routes.js";
@@ -23,7 +23,7 @@ if (env.NODE_ENV === "production") {
 }
 
 app.use(helmet());
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+// app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
