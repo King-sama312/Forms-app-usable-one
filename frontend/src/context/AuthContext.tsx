@@ -15,7 +15,7 @@ type AuthContextType = {
   logout: () => Promise<void>;
 };
 
-const context = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: React.PropsWithChildren) {
   const [user, setUser] = useState<User | null>(null);
@@ -50,14 +50,14 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
   }
 
   return (
-    <context.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
-    </context.Provider>
+    </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const value = useContext(context);
+  const value = useContext(AuthContext);
   if (value === null)
     throw new Error("useAuth must be used within an AuthProvider");
   return value;
